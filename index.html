@@ -35,7 +35,6 @@
       transform: scale(1.05);
     }
 
-    /* Photocard */
     .card img {
       width: 150px;
       border-radius: 15px;
@@ -43,7 +42,6 @@
       margin-top: 10px;
     }
 
-    /* Collection */
     .collection {
       display: flex;
       flex-wrap: wrap;
@@ -64,7 +62,7 @@
     #puzzle {
       display: flex;
       flex-wrap: wrap;
-      width: 600px;
+      width: 320px;
       max-width: 95vw;
       margin: 20px auto;
     }
@@ -81,24 +79,17 @@
   <h1>💜 Welcome to ARMY Fun Zone 💜</h1>
   <p>Watch the video and unlock a photocard!</p>
 
-  <!-- BTS VIDEO -->
-  <iframe 
-    src="https://www.youtube.com/embed/gdZLi9oWNZg"
-    allowfullscreen>
-  </iframe>
+  <iframe src="https://www.youtube.com/embed/gdZLi9oWNZg" allowfullscreen></iframe>
 
   <br>
   <button onclick="unlockCard()">I finished watching 💜</button>
 
-  <!-- Unlocked Card -->
   <div class="card" id="card"></div>
 
-  <!-- Collection -->
   <h2>📦 My Collection</h2>
   <div class="collection" id="collection"></div>
 
-  <!-- Puzzle -->
-  <h2>🧩 BTS Ultimate Puzzle (12×12)</h2>
+  <h2>🧩 BTS Puzzle (8×8)</h2>
   <p>Click two pieces to swap them!</p>
   <div id="puzzle"></div>
   <button onclick="shufflePuzzle()">Shuffle Puzzle</button>
@@ -106,7 +97,6 @@
 </div>
 
 <script>
-  /* MEMBERS */
   const members = [
     { name: "RM", img: "rm.jpg" },
     { name: "Jin", img: "jin.jpg" },
@@ -121,24 +111,20 @@
 
   function unlockCard() {
     const random = members[Math.floor(Math.random() * members.length)];
-
     if (!collection.includes(random.name)) {
       collection.push(random.name);
       localStorage.setItem("collection", JSON.stringify(collection));
     }
-
     document.getElementById("card").innerHTML = `
       <h3>You unlocked ${random.name}! 💜</h3>
       <img src="${random.img}">
     `;
-
     renderCollection();
   }
 
   function renderCollection() {
     const col = document.getElementById("collection");
     col.innerHTML = "";
-
     members.forEach(m => {
       const img = document.createElement("img");
       img.src = m.img;
@@ -152,7 +138,7 @@
   /* PUZZLE */
   const puzzleContainer = document.getElementById("puzzle");
   const puzzleMessage = document.getElementById("puzzleMessage");
-  const puzzleSize = 12;
+  const puzzleSize = 8;
   const puzzleImage = "puzzle.jpg";
   let pieces = [];
   let firstPick = null;
@@ -173,7 +159,7 @@
         `-${(i % puzzleSize) * pieceSize}px -${Math.floor(i / puzzleSize) * pieceSize}px`;
       piece.dataset.correct = piece.style.backgroundPosition;
 
-      piece.addEventListener("click", () => selectPiece(piece));
+      piece.onclick = () => selectPiece(piece);
       pieces.push(piece);
       puzzleContainer.appendChild(piece);
     }
@@ -187,7 +173,6 @@
       const temp = firstPick.style.backgroundPosition;
       firstPick.style.backgroundPosition = piece.style.backgroundPosition;
       piece.style.backgroundPosition = temp;
-
       firstPick.style.border = "1px solid white";
       firstPick = null;
       checkPuzzle();
@@ -196,10 +181,10 @@
 
   function shufflePuzzle() {
     pieces.forEach(p => {
-      const rand = pieces[Math.floor(Math.random() * pieces.length)];
-      const temp = p.style.backgroundPosition;
-      p.style.backgroundPosition = rand.style.backgroundPosition;
-      rand.style.backgroundPosition = temp;
+      const r = pieces[Math.floor(Math.random() * pieces.length)];
+      const t = p.style.backgroundPosition;
+      p.style.backgroundPosition = r.style.backgroundPosition;
+      r.style.backgroundPosition = t;
     });
     puzzleMessage.innerText = "";
   }
@@ -208,8 +193,7 @@
     for (let p of pieces) {
       if (p.style.backgroundPosition !== p.dataset.correct) return;
     }
-
-    puzzleMessage.innerText = "🎉 Puzzle completed! You earned a photocard 💜";
+    puzzleMessage.innerText = "🎉 Puzzle completed! Photocard unlocked 💜";
     unlockCard();
   }
 
@@ -218,4 +202,6 @@
 </script>
 
 </body>
-  </html>
+</html>          
+
+    
