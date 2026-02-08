@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ARMY Fun Zone 💜</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #7b2ff7, #f107a3);
+      color: white;
+      text-align: center;
+    }
+    .container {
+      padding: 20px;
+    }
+    iframe {
+      width: 100%;
+      max-width: 350px;
+      height: 200px;
+      border-radius: 15px;
+      margin: 15px 0;
+    }
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      background: #fff;
+      color: #7b2ff7;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    /* Photocard */
+    .card img {
+      width: 150px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      margin-top: 10px;
+    }
+
+    /* Collection */
+    .collection {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .collection img {
+      width: 80px;
+      border-radius: 10px;
+      opacity: 0.4;
+    }
+    .unlocked {
+      opacity: 1;
+    }
+
+    /* Puzzle */
+    #puzzle {
+      display: flex;
+      flex-wrap: wrap;
+      width: 600px;
+      max-width: 95vw;
+      margin: 20px auto;
+    }
+    #puzzle div {
+      border: 1px solid white;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>💜 Welcome to ARMY Fun Zone 💜</h1>
+  <p>Watch the video and unlock a photocard!</p>
+
+  <!-- BTS VIDEO -->
+  <iframe 
+    src="https://www.youtube.com/embed/gdZLi9oWNZg"
+    allowfullscreen>
+  </iframe>
+
+  <br>
+  <button onclick="unlockCard()">I finished watching 💜</button>
+
+  <!-- Unlocked Card -->
+  <div class="card" id="card"></div>
+
+  <!-- Collection -->
+  <h2>📦 My Collection</h2>
+  <div class="collection" id="collection"></div>
+
+  <!-- Puzzle -->
+  <h2>🧩 BTS Ultimate Puzzle (12×12)</h2>
+  <p>Click two pieces to swap them!</p>
+  <div id="puzzle"></div>
+  <button onclick="shufflePuzzle()">Shuffle Puzzle</button>
+  <p id="puzzleMessage"></p>
+</div>
+
+<script>
+  /* MEMBERS */
+  const members = [
+    { name: "RM", img: "rm.jpg" },
+    { name: "Jin", img: "jin.jpg" },
+    { name: "SUGA", img: "suga.jpg" },
+    { name: "j-hope", img: "jhope.jpg" },
+    { name: "Jimin", img: "jimin.jpg" },
+    { name: "V", img: "v.jpg" },
+    { name: "Jungkook", img: "jk.jpg" }
+  ];
+
+  let collection = JSON.parse(localStorage.getItem("collection")) || [];
+
+  function unlockCard() {
+    const random = members[Math.floor(Math.random() * members.length)];
+
+    if (!collection.includes(random.name)) {
+      collection.push(random.name);
+      localStorage.setItem("collection", JSON.stringify(collection));
+    }
+
+    document.getElementById("card").innerHTML = `
+      <h3>You unlocked ${random.name}! 💜</h3>
+      <img src="${random.img}">
+    `;
+
+    renderCollection();
+  }
+
+  function renderCollection() {
+    const col = document.getElementById("collection");
+    col.innerHTML = "";
+
+    members.forEach(m => {
+      const img = document.createElement("img");
+      img.src = m.img;
+      if (collection.includes(m.name)) img.classList.add("unlocked");
+      col.appendChild(img);
+    });
+  }
+
+  renderCollection();
+
+  /* PUZZLE */
+  const puzzleContainer = document.getElementById("puzzle");
+  const puzzleMessage = document.getElementById("puzzleMessage");
+  const puzzleSize = 12;
+  const puzzleImage = "puzzle.jpg";
+  let pieces = [];
+  let firstPick = null;
+
+  function createPuzzle() {
+    pieces = [];
+    puzzleContainer.innerHTML = "";
+    const size = puzzleContainer.offsetWidth;
+    const pieceSize = size / puzzleSize;
+
+    for (let i = 0; i < puzzleSize * puzzleSize; i++) {
+      const piece = document.createElement("div");
+      piece.style.width = pieceSize + "px";
+      piece.style.height = pieceSize + "px";
+      piece.style.backgroundImage = `url("${puzzleImage}")`;
+      piece.style.backgroundSize = `${size}px ${size}px`;
+      piece.style.backgroundPosition =
+        `-${(i % puzzleSize) * pieceSize}px -${Math.floor(i / puzzleSize) * pieceSize}px`;
+      piece.dataset.correct = piece.style.backgroundPosition;
+
+      piece.addEventListener("click", () => selectPiece(piece));
+      pieces.push(piece);
+      puzzleContainer.appendChild(piece);
+    }
+  }
+
+  function selectPiece(piece) {
+    if (!firstPick) {
+      firstPick = piece;
+      piece.style.border = "2px solid yellow";
+    } else {
+      const temp = firstPick.style.backgroundPosition;
+      firstPick.style.backgroundPosition = piece.style.backgroundPosition;
+      piece.style.backgroundPosition = temp;
+
+      firstPick.style.border = "1px solid white";
+      firstPick = null;
+      checkPuzzle();
+    }
+  }
+
+  function shufflePuzzle() {
+    pieces.forEach(p => {
+      const rand = pieces[Math.floor(Math.random() * pieces.length)];
+      const temp = p.style.backgroundPosition;
+      p.style.backgroundPosition = rand.style.backgroundPosition;
+      rand.style.backgroundPosition = temp;
+    });
+    puzzleMessage.innerText = "";
+  }
+
+  function checkPuzzle() {
+    for (let p of pieces) {
+      if (p.style.backgroundPosition !== p.dataset.correct) return;
+    }
+
+    puzzleMessage.innerText = "🎉 Puzzle completed! You earned a photocard 💜";
+    unlockCard();
+  }
+
+  createPuzzle();
+  shufflePuzzle();
+</script>
+
+</body>
+  </html>
